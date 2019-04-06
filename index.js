@@ -1,21 +1,5 @@
-// expectOutput =>
-// 异常
-// output: {
-//   isError: true,
-//   errMsg: '未指定schema',
-// },
-// 正常
-// output: {
-//   isError: false,
-//   returnvalue: { a: 1 },
-// },
-
-function commonErrorCheck(actualError, expectOutput) {
-  expect(true).toBe(expectOutput.isError);
-  if (expectOutput.errMsg) {
-    expect(actualError.message).toBe(expectOutput.errMsg);
-  }
-}
+const Log = require('log');
+log = new Log('Info');
 
 function check(actualvalue, expectvalue) {
   if (expectvalue) {
@@ -41,33 +25,92 @@ function check(actualvalue, expectvalue) {
     }
   }
 }
+// expectOutput =>
+// 异常
+// output: {
+//   isError: true,
+//   errMsg: '未指定schema',
+// },
+// 正常
+// output: {
+//   isError: false,
+//   returnvalue: { a: 1 },
+// },
+class TestUtil {
+  constructor(description){
+    this.description = description || '';
+  };
 
-function commonReturnValueCheck(isNormal, actualResult, expectOutput) {
-  if (isNormal) {
-    expect(false).toBe(expectOutput.isError);
-    check(actualResult, expectOutput.returnvalue);
+  commonErrorCheck(actualError, expectOutput) {
+    try {
+      expect(true).toBe(expectOutput.isError);
+    } catch (error) {
+      log.error(this.description, 'expected to be a normal case, but caught an error', error);
+      throw error;
+    }
+    if (expectOutput.errMsg) {
+      try {
+        expect(actualError.message).toBe(expectOutput.errMsg);
+      } catch (error) {
+        log.error(this.description, `expected error ${expectOutput.errMsg} , but got ${actualError.message}`);
+        throw error;
+      }
+    }
   }
-}
-
-// expectMock =>
-// {
-// isCalled: true/false
-// expectParam: [
-// param1,
-// param2,
-// ]
-// }
-function commonMockFunCheck(mockFunc, expectMock) {
-  if (expectMock.isCalled) {
-    expect(mockFunc).toHaveBeenCalled();
-    expect(
-      mockFunc.mock.calls[0],
-    ).toEqual(expect.arrayContaining(expectMock.expectParam));
-  } else {
-    expect(mockFunc).not.toHaveBeenCalled();
+  
+  
+  
+  commonReturnValueCheck(isNormal, actualResult, expectOutput) {
+    if (isNormal) {
+      try {
+        expect(false).toBe(expectOutput.isError);
+      } catch (error) {
+        log.error(this.description, 'expected to be a error case, but did not caught an error');
+        throw error;
+      }
+      try {
+        check(actualResult, expectOutput.returnvalue);
+      } catch (error) {
+        log.error(this.description, `expect return ${expectOutput.returnvalue} | actual return ${actualResult}`)
+        throw error;
+      }
+    }
   }
-}
+  
+  // expectMock =>
+  // {
+  // isCalled: true/false
+  // expectParam: [
+  //  param1,
+  //  param2,
+  // ]
+  // }
+  commonMockFunCheck(mockFunc, expectMock) {
+    if (expectMock.isCalled) {
+      try {
+        expect(mockFunc).toHaveBeenCalled();
+      } catch (error) {
+        log.error(this.description, `${mockFunc.name} was not called as expected`);
+        throw error;
+      }
+      try {
+        expect(
+          mockFunc.mock.calls[0],
+        ).toEqual(expect.arrayContaining(expectMock.expectParam));
+      } catch (error) {
+        log.error(this.description, `${mockFunc.name} was called with params [${mockFunc.mock.calls[0]}] while expect params should be [${expectMock.expectParam}]`);
+        throw error;
+      }
+    } else {
+      try {
+        expect(mockFunc).not.toHaveBeenCalled();
+      } catch (error) {
+        log.error(this.description, `${mockFunc.name} should not be called`);
+        throw error;
+      }
+    }
+  }
+};
 
-module.exports.commonErrorCheck = commonErrorCheck;
-module.exports.commonReturnValueCheck = commonReturnValueCheck;
-module.exports.commonMockFunCheck = commonMockFunCheck;
+
+module.exports.TestUtil = TestUtil;

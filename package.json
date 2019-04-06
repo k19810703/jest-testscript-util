@@ -34,8 +34,7 @@
     "url": "git+https://github.com/k19810703/jest-testscript-util.git"
   },
   "keywords": [
-    "node",
-    "db2"
+    "jest"
   ],
   "author": "wuhd <k19810703@163.com>",
   "license": "MIT",
@@ -43,6 +42,7 @@
     "url": "https://github.com/k19810703/jest-testscript-util/issues"
   },
   "dependencies": {
+    "log": "^1.4.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
