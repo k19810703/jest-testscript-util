@@ -1,5 +1,9 @@
+/* eslint-env jest */
+
 const Log = require('log');
-log = new Log('Info');
+const request = require('supertest');
+
+const log = new Log('Info');
 
 function check(actualvalue, expectvalue) {
   if (expectvalue) {
@@ -21,7 +25,7 @@ function check(actualvalue, expectvalue) {
         }
         break;
       default:
-        throw new Error(`invalid type: ${typeof expectvalue}`)
+        throw new Error(`invalid type: ${typeof expectvalue}`);
     }
   }
 }
@@ -37,9 +41,9 @@ function check(actualvalue, expectvalue) {
 //   returnvalue: { a: 1 },
 // },
 class TestUtil {
-  constructor(description){
+  constructor(description) {
     this.description = description || '';
-  };
+  }
 
   commonErrorCheck(actualError, expectOutput) {
     try {
@@ -57,9 +61,7 @@ class TestUtil {
       }
     }
   }
-  
-  
-  
+
   commonReturnValueCheck(isNormal, actualResult, expectOutput) {
     if (isNormal) {
       try {
@@ -71,12 +73,12 @@ class TestUtil {
       try {
         check(actualResult, expectOutput.returnvalue);
       } catch (error) {
-        log.error(this.description, `expect return ${expectOutput.returnvalue} | actual return ${actualResult}`)
+        log.error(this.description, `expect return ${expectOutput.returnvalue} | actual return ${actualResult}`);
         throw error;
       }
     }
   }
-  
+
   // expectMock =>
   // {
   // isCalled: true/false
@@ -110,7 +112,49 @@ class TestUtil {
       }
     }
   }
-};
 
+  async commonRouteTest(testdata) {
+    let response;
+    const bodydata = testdata.routeinfo.data || {};
+    switch (testdata.routeinfo.method) {
+      case 'get':
+        response = await request(testdata.routemodule).get(testdata.routeinfo.url);
+        break;
+      case 'put':
+        response = await request(testdata.routemodule).put(testdata.routeinfo.url).send(bodydata);
+        break;
+      case 'post':
+        response = await request(testdata.routemodule).post(testdata.routeinfo.url).send(bodydata);
+        break;
+      case 'delete':
+        response = await request(testdata.routemodule).delete(testdata.routeinfo.url);
+        break;
+      default:
+        throw new Error(`invalid method: ${testdata.routeinfo.method}`);
+    }
+    try {
+      expect(response.statusCode).toBe(testdata.expect.statusCode);
+    } catch (error) {
+      log.error(this.description, `actual status code ${response.statusCode} expect status code ${testdata.expect.statusCode}`);
+      throw error;
+    }
+    if (testdata.expect.response.text) {
+      try {
+        expect(response.text).toBe(testdata.expect.response.text);
+      } catch (error) {
+        log.error(this.description, `actual response ${response.text} expect response ${testdata.expect.response.text}`);
+        throw error;
+      }
+    }
+    if (testdata.expect.response.data) {
+      try {
+        expect(response.data).toEqual(expect.objectContaining(testdata.expect.response.data));
+      } catch (error) {
+        log.error(this.description, `actual response ${response.data} expect response ${testdata.expect.response.data}`);
+        throw error;
+      }
+    }
+  }
+}
 
 module.exports.TestUtil = TestUtil;
