@@ -113,25 +113,7 @@ class TestUtil {
     }
   }
 
-  async commonRouteTest(testdata) {
-    let response;
-    const bodydata = testdata.routeinfo.data || {};
-    switch (testdata.routeinfo.method) {
-      case 'get':
-        response = await request(testdata.routemodule).get(testdata.routeinfo.url);
-        break;
-      case 'put':
-        response = await request(testdata.routemodule).put(testdata.routeinfo.url).send(bodydata);
-        break;
-      case 'post':
-        response = await request(testdata.routemodule).post(testdata.routeinfo.url).send(bodydata);
-        break;
-      case 'delete':
-        response = await request(testdata.routemodule).delete(testdata.routeinfo.url);
-        break;
-      default:
-        throw new Error(`invalid method: ${testdata.routeinfo.method}`);
-    }
+  commonRouteTest(response, testdata) {
     try {
       expect(response.statusCode).toBe(testdata.expect.statusCode);
     } catch (error) {
@@ -148,7 +130,7 @@ class TestUtil {
     }
     if (testdata.expect.response.data) {
       try {
-        expect(response.data).toEqual(expect.objectContaining(testdata.expect.response.data));
+        expect(response.data).toEqual(expect.objectContaining(testdata.expect.response.body));
       } catch (error) {
         log.error(this.description, `actual response ${response.data} expect response ${testdata.expect.response.data}`);
         throw error;

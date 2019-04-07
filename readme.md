@@ -129,3 +129,19 @@ describe('测试', () => {
   );
 });
 ```
+
+利用supertest来做route的测试时，可以使用标准结果验证函数commonRouteTest来验证状态码和返回值
+``` javascript
+const response = await request(testdata.routemodule).post(testdata.routeinfo.url).send(testdata.routeinfo.data);
+testuitl.commonRouteTest(response, testdata);
+
+// testdata需要包含
+// expect: {
+//   statusCode: 200,
+//   response下text data 需要定义其中一个
+//   response: {
+//     text: 'response string',
+//     data: { responsedata: 'aaa' },
+//   },
+// },
+```
