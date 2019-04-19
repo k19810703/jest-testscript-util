@@ -120,7 +120,7 @@ class TestUtil {
       log.error(this.description, `actual status code ${response.statusCode} expect status code ${testdata.expect.statusCode}`);
       throw error;
     }
-    if (testdata.expect.response.text) {
+    if (testdata.expect.response && testdata.expect.response.text) {
       try {
         expect(response.text).toBe(testdata.expect.response.text);
       } catch (error) {
@@ -128,7 +128,7 @@ class TestUtil {
         throw error;
       }
     }
-    if (testdata.expect.response.data) {
+    if (testdata.expect.response && testdata.expect.response.data) {
       try {
         expect(response.body).toEqual(expect.objectContaining(testdata.expect.response.data));
       } catch (error) {
