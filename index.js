@@ -130,9 +130,9 @@ class TestUtil {
     }
     if (testdata.expect.response.data) {
       try {
-        expect(response.data).toEqual(expect.objectContaining(testdata.expect.response.body));
+        expect(response.body).toEqual(expect.objectContaining(testdata.expect.response.data));
       } catch (error) {
-        log.error(this.description, `actual response ${response.data} expect response ${testdata.expect.response.data}`);
+        log.error(this.description, `actual response ${response.body} expect response ${testdata.expect.response.data}`);
         throw error;
       }
     }
